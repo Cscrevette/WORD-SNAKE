@@ -43,7 +43,7 @@ body {
     z-index: 100;
     transition: opacity 1s ease-out; 
 
-    /* ANCIENNES PROPRIÉTÉS D'IMAGE DE FOND SONT SUPPRIMÉES */
+    /* Si l'image est requise, décommenter ci-dessous (mais elle n'est pas essentielle ici) */
     /* background-image: url('intro_background.png'); */ 
     /* background-size: cover; */ 
     /* background-position: center; */ 
@@ -62,28 +62,35 @@ body {
 /* --- Style du titre "WORD SNAKE" --- */
 #intro-title {
     display: block; 
-    opacity: 1 !important; /* Force l'opacité maximale */
-    font-size: 4em; /* Taille plus grande pour le titre */
+    opacity: 1 !important; /* Reste opaque */
+    font-size: 4em; 
     color: var(--neon-cyan);
     text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-cyan);
-    margin-bottom: 5px; /* Petit espace sous le titre */
+    margin-bottom: 5px; 
 }
 
 /* --- Style de la signature "by D.V." avec effet clignotant --- */
 #intro-signature {
     display: block; 
-    opacity: 1 !important; /* Force l'opacité maximale */
+    opacity: 1 !important; /* Reste opaque malgré la transition du parent */
     font-size: 1.5em;
     color: var(--neon-red); 
-    text-shadow: 0 0 5px var(--neon-red), 0 0 10px var(--neon-red);
-    animation: neon-blink 1.2s infinite alternate; /* ANIMATION CLIGNOTANTE */
-    margin-bottom: 40px; /* Espace avant le bouton */
+    /* Règle clé pour le clignotement: */
+    animation: neon-blink 1.2s infinite alternate; 
+    
+    margin-bottom: 40px;
 }
 
-/* --- Animation Clignotante pour la signature --- */
+/* --- Animation Clignotante pour la signature (Recréée) --- */
 @keyframes neon-blink {
-    from { opacity: 1; text-shadow: 0 0 5px var(--neon-red), 0 0 10px var(--neon-red); }
-    to { opacity: 0.6; text-shadow: 0 0 2px var(--neon-red), 0 0 5px var(--neon-red); }
+    from { 
+        opacity: 1; 
+        text-shadow: 0 0 5px var(--neon-red), 0 0 10px var(--neon-red); 
+    }
+    to { 
+        opacity: 0.6; 
+        text-shadow: 0 0 2px var(--neon-red), 0 0 5px var(--neon-red); 
+    }
 }
 
 
