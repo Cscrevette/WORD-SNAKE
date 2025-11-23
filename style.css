@@ -32,7 +32,6 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    /* Utilise 100svh pour la hauteur visible sur mobile */
     height: 100svh; 
     
     display: flex;
@@ -42,30 +41,46 @@ body {
     z-index: 100;
     transition: opacity 1s ease-out; 
 
-    /* Propriétés pour l'image de fond */
-    background-image: url('intro_background.png'); 
+    /* PROPRIÉTÉS POUR L'IMAGE DE FOND (L'image est maintenant SANS le titre) */
+    background-image: url('intro_background.png'); /* <<< Assurez-vous que ce nom est correct */
     background-size: cover; 
     background-position: center; 
     background-repeat: no-repeat; 
 }
 
-/* --- Contenu de l'Intro (Pour le bouton DÉMARRER LE JEU) --- */
+/* --- Contenu de l'Intro (Pour le bouton DÉMARRER LE JEU et les titres) --- */
 #intro-content {
     display: flex; 
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin-top: 200px; 
+    /* On retire les marges pour un centrage parfait au milieu de l'écran */
+    margin-top: 0; 
 }
 
-/* Masquer le titre et la signature HTML car ils sont dans l'image */
-#intro-title, #intro-signature {
-    display: none; 
+/* --- Révéler le titre et la signature HTML --- */
+#intro-title {
+    /* Révélé et centré */
+    display: block; 
+    font-size: 4em;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-cyan);
+    margin-bottom: 5px; /* Réduit l'espace sous le titre */
+}
+
+#intro-signature {
+    /* Révélé et centré */
+    display: block; 
+    font-size: 1.5em;
+    color: var(--neon-red); 
+    text-shadow: 0 0 5px var(--neon-red), 0 0 10px var(--neon-red);
+    animation: neon-blink 1.2s infinite alternate; 
+    margin-bottom: 40px; /* Espace avant le bouton */
 }
 
 /* --- Style pour le bouton de démarrage --- */
 #start-button {
-    margin-top: 30px; 
+    margin-top: 0; /* Plus besoin de marge supérieure */
     padding: 15px 30px;
     background-color: var(--neon-red); 
     color: var(--deep-purple);
@@ -93,19 +108,16 @@ body {
     position: relative;
     overflow: hidden;
     
-    /* CLÉ DE LA RÉACTIVITÉ : Utiliser la fonction min() pour dimensionner */
-    /* La taille sera limitée par la plus petite des valeurs : 606px, 95% de la largeur de la fenêtre, ou 95% de la hauteur visible */
     width: min(606px, 95vw, 95svh); 
     height: min(606px, 95vw, 95svh);
     
-    /* Assure que le canvas (600x600) s'adapte à 100% de ce conteneur */
     padding: 3px; 
 }
 
 #game-canvas {
     display: block;
     background-color: var(--dark-purple);
-    width: 100%; /* Le canvas prend 100% du conteneur */
+    width: 100%; 
     height: 100%;
 }
 
