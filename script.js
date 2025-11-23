@@ -58,7 +58,7 @@ let immunityTimer = 0;
 const IMMUNITY_DURATION = 5000;
 const POWER_UP_SPAWN_CHANCE = 0.15; 
 
-// --- VARIABLES TACTILES ---
+// --- VARIABLES TACTILES (SWIPE) ---
 let touchStartX = 0;
 let touchStartY = 0;
 const SWIPE_THRESHOLD = 15; 
@@ -74,6 +74,14 @@ let snakeColor = NEON_COLORS[0];
 function initializeGame() {
     gameOverScreen.style.display = 'none';
     victoryScreen.style.display = 'none';
+    
+    // 1. DÉTECTION DE LA NOUVELLE TAILLE RECTANGULAIRE
+    const containerWidth = gameContainer.offsetWidth;
+    const containerHeight = gameContainer.offsetHeight;
+
+    // Redimensionne le Canvas pour remplir le conteneur rectangulaire
+    canvas.width = containerWidth - 6; // -6 pour les bordures CSS
+    canvas.height = containerHeight - 6; 
     
     isImmune = false;
     lifeUp = null;
@@ -123,14 +131,18 @@ function placeLettersOnGrid() {
     targetWordDisplay.textContent = currentWord; 
     targetWordDisplay.innerHTML = `<span style="color: var(--neon-red); text-shadow: 0 0 5px var(--neon-red);">${currentWord}</span>`;
 
+    // Utilise la nouvelle taille du canvas pour le placement
+    const currentTileCountX = canvas.width / gridSize;
+    const currentTileCountY = canvas.height / gridSize;
+
     for (let i = 0; i < currentWord.length; i++) {
         let newPos;
         let posKey;
         
         do {
             newPos = {
-                x: Math.floor(Math.random() * tileCount) * gridSize,
-                y: Math.floor(Math.random() * tileCount) * gridSize,
+                x: Math.floor(Math.random() * currentTileCountX) * gridSize,
+                y: Math.floor(Math.random() * currentTileCountY) * gridSize,
                 letter: currentWord[i],
                 color: NEON_COLORS[Math.floor(Math.random() * NEON_COLORS.length)] 
             };
@@ -162,11 +174,14 @@ function spawnLifeUp() {
     if (Math.random() < POWER_UP_SPAWN_CHANCE && lifeUp === null) {
         let newPos;
         let posKey;
+        
+        const currentTileCountX = canvas.width / gridSize;
+        const currentTileCountY = canvas.height / gridSize;
 
         do {
             newPos = {
-                x: Math.floor(Math.random() * tileCount) * gridSize,
-                y: Math.floor(Math.random() * tileCount) * gridSize,
+                x: Math.floor(Math.random() * currentTileCountX) * gridSize,
+                y: Math.floor(Math.random() * currentTileCountY) * gridSize,
             };
             posKey = `${newPos.x},${newPos.y}`;
         } while (isPositionOnSnake(newPos) || isPositionOnLetter(newPos));
@@ -176,7 +191,7 @@ function spawnLifeUp() {
 }
 
 
-// --- Logique de Difficulté ---
+// --- Logique de Difficulté (inchangée) ---
 
 function checkDifficultyIncrease() {
     if (totalScore >= DIFFICULTY_THRESHOLD && gameSpeed === BASE_SPEED) {
@@ -198,10 +213,9 @@ function drawRect(x, y, color, shadowColor, letter = null) {
     ctx.shadowBlur = 10;
     ctx.shadowColor = shadowColor;
     ctx.fillRect(x, y, gridSize, gridSize);
-    ctx.shadowBlur = 0; // Réinitialise l'ombre pour ne pas affecter le 3D
+    ctx.shadowBlur = 0; 
 
     // 2. Dessine l'effet de biseau/profondeur (Pseudo-3D)
-    // Côté sombre (bas et droite)
     ctx.fillStyle = 'rgba(0, 0, 0, 0.4)'; // Gris foncé semi-transparent
     ctx.fillRect(x + 1, y + gridSize - 2, gridSize - 2, 2); // Bord inférieur
     ctx.fillRect(x + gridSize - 2, y + 1, 2, gridSize - 2); // Bord droit
@@ -214,35 +228,31 @@ function drawRect(x, y, color, shadowColor, letter = null) {
         
         ctx.fillStyle = '#000000'; // Texte noir
         
-        // Ajout d'une petite ombre sur le texte pour le détacher du fond du carré
         ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
         ctx.shadowBlur = 2;
         
         ctx.fillText(letter, x + gridSize / 2, y + gridSize / 2);
         
-        ctx.shadowBlur = 0; // Réinitialiser l'ombre du texte
+        ctx.shadowBlur = 0;
     }
 }
 
 function drawLifeUp() {
     if (lifeUp === null) return;
 
-    // Utilise drawRect pour dessiner le carré (qui aura l'effet 3D)
     drawRect(lifeUp.x, lifeUp.y, '#FFFFFF', '#FFFFFF'); 
     
-    // Dessine le cœur après le carré 3D pour s'assurer qu'il est en surface
     ctx.fillStyle = '#FF0000'; 
     ctx.font = '16px monospace'; 
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     
-    // Ajout d'une ombre au cœur pour un effet 3D/néon sur le Power-Up
     ctx.shadowColor = '#FF0000';
     ctx.shadowBlur = 4;
     
     ctx.fillText('♥', lifeUp.x + gridSize / 2, lifeUp.y + gridSize / 2); 
     
-    ctx.shadowBlur = 0; // Réinitialiser après le cœur
+    ctx.shadowBlur = 0; 
 }
 
 function drawSnake() {
@@ -267,7 +277,7 @@ function drawLetters() {
     }
 }
 
-// --- Logique du Jeu (inchangée) ---
+// --- Logique du Jeu ---
 
 function advanceSnake() {
     const head = { x: snake[0].x + dx, y: snake[0].y + dy };
@@ -342,6 +352,9 @@ function checkCollision() {
     
     if (hitWall) {
         if (isImmune) {
+            const currentTileCountX = canvas.width / gridSize;
+            const currentTileCountY = canvas.height / gridSize;
+
             if (head.x < 0) head.x = canvas.width - gridSize;
             else if (head.x >= canvas.width) head.x = 0;
             else if (head.y < 0) head.y = canvas.height - gridSize;
@@ -403,7 +416,7 @@ function gameLoop() {
     drawSnake();
 }
 
-// --- Contrôle des Événements (inchangé) ---
+// --- Contrôle des Entrées (inchangé) ---
 
 function changeDirection(event) {
     if (changingDirection) return;
@@ -481,7 +494,6 @@ function startGameSequence() {
         introScreen.style.display = 'none';
         gameContainer.style.display = 'block';
         
-        selectNewWord(); 
         initializeGame(); 
     }, 1000); 
 }
