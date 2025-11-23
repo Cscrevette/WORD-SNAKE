@@ -58,7 +58,7 @@ let immunityTimer = 0;
 const IMMUNITY_DURATION = 5000;
 const POWER_UP_SPAWN_CHANCE = 0.15; 
 
-// --- VARIABLES TACTILES (NOUVEAU) ---
+// --- VARIABLES TACTILES ---
 let touchStartX = 0;
 let touchStartY = 0;
 const SWIPE_THRESHOLD = 15; 
@@ -176,7 +176,7 @@ function spawnLifeUp() {
 }
 
 
-// --- Logique de Difficulté (inchangée) ---
+// --- Logique de Difficulté ---
 
 function checkDifficultyIncrease() {
     if (totalScore >= DIFFICULTY_THRESHOLD && gameSpeed === BASE_SPEED) {
@@ -190,23 +190,35 @@ function checkDifficultyIncrease() {
     }
 }
 
-// --- Fonctions de Dessin ---
+// --- Fonctions de Dessin (Pseudo-3D Appliqué) ---
 
 function drawRect(x, y, color, shadowColor, letter = null) {
+    // 1. Dessine le carré principal (avec le halo néon)
     ctx.fillStyle = color;
     ctx.shadowBlur = 10;
     ctx.shadowColor = shadowColor;
     ctx.fillRect(x, y, gridSize, gridSize);
-    ctx.shadowBlur = 0;
+    ctx.shadowBlur = 0; 
+
+    // 2. Dessine l'effet de biseau/profondeur (Pseudo-3D)
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)'; // Gris foncé semi-transparent
+    ctx.fillRect(x + 1, y + gridSize - 2, gridSize - 2, 2); // Bord inférieur
+    ctx.fillRect(x + gridSize - 2, y + 1, 2, gridSize - 2); // Bord droit
     
+    // 3. Dessiner la lettre (si elle existe)
     if (letter) {
         ctx.font = '14px monospace';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
-        ctx.fillStyle = '#000000'; 
+        ctx.fillStyle = '#000000'; // Texte noir
+        
+        ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
+        ctx.shadowBlur = 2;
         
         ctx.fillText(letter, x + gridSize / 2, y + gridSize / 2);
+        
+        ctx.shadowBlur = 0;
     }
 }
 
@@ -219,7 +231,13 @@ function drawLifeUp() {
     ctx.font = '16px monospace'; 
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
+    
+    ctx.shadowColor = '#FF0000';
+    ctx.shadowBlur = 4;
+    
     ctx.fillText('♥', lifeUp.x + gridSize / 2, lifeUp.y + gridSize / 2); 
+    
+    ctx.shadowBlur = 0; 
 }
 
 function drawSnake() {
@@ -311,24 +329,21 @@ function updateTargetWordDisplay() {
 function checkCollision() {
     const head = snake[0];
     
-    // Collision avec soi-même (toujours mortelle)
     for (let i = 4; i < snake.length; i++) {
         if (head.x === snake[i].x && head.y === snake[i].y) return true;
     }
 
-    // Collision avec les murs
     const hitWall = head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height;
     
     if (hitWall) {
         if (isImmune) {
-            // Téléporte le serpent de l'autre côté (wrap around)
             if (head.x < 0) head.x = canvas.width - gridSize;
             else if (head.x >= canvas.width) head.x = 0;
             else if (head.y < 0) head.y = canvas.height - gridSize;
             else if (head.y >= canvas.height) head.y = 0;
-            return false; // Collision ignorée
+            return false;
         } else {
-            return true; // Collision mortelle
+            return true;
         }
     }
 
@@ -364,7 +379,6 @@ function gameLoop() {
     changingDirection = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height); 
     
-    // Gestion du minuteur d'immunité
     if (isImmune) {
         immunityTimer -= gameSpeed; 
         if (immunityTimer <= 0) {
@@ -417,7 +431,7 @@ function changeDirection(event) {
     }
 }
 
-// --- Contrôle des Entrées (Tactile) (NOUVEAU) ---
+// --- Contrôle des Entrées (Tactile) ---
 
 function handleTouchStart(event) {
     event.preventDefault(); 
@@ -441,18 +455,14 @@ function handleTouchEnd(event) {
         let keyPressed;
 
         if (absDx > absDy) {
-            // Mouvement horizontal (Right=39, Left=37)
             keyPressed = (dxTouch > 0) ? 39 : 37; 
         } else {
-            // Mouvement vertical (Down=40, Up=38)
             keyPressed = (dyTouch > 0) ? 40 : 38; 
         }
 
-        // Simule l'événement keydown pour changer la direction du serpent
         changeDirection({ keyCode: keyPressed });
     }
 }
-
 
 // --- Contrôle de l'Introduction et des Boutons ---
 
@@ -478,8 +488,8 @@ function startIntroAndGame() {
 
 // --- Écouteurs d'Événements (Final) ---
 document.addEventListener('keydown', changeDirection);
-canvas.addEventListener('touchstart', handleTouchStart, false); // TACTILE NOUVEAU
-canvas.addEventListener('touchend', handleTouchEnd, false);     // TACTILE NOUVEAU
+canvas.addEventListener('touchstart', handleTouchStart, false); 
+canvas.addEventListener('touchend', handleTouchEnd, false);     
 
 replayButton.addEventListener('click', initializeGame); 
 nextWordButton.addEventListener('click', () => {
