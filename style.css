@@ -1,253 +1,506 @@
-/* Définition des variables de couleur pour le néon */
-:root {
-    --neon-red: #ff3366;
-    --neon-cyan: #33ffff;
-    --dark-purple: #12002b;
-    --deep-purple: #0a001a;
-    --neon-green: #00ff7f; /* Nouvelle couleur pour la victoire */
-}
+// --- Définition des Éléments Audio ---
+const bgm = document.getElementById('bgm');
+const collectSfx = document.getElementById('collect-sfx');
+const gameOverSfx = document.getElementById('gameover-sfx');
 
-/* NOUVEAU : CSS pour la réactivité mobile */
-body {
-    background-color: var(--deep-purple);
-    font-family: monospace;
-    color: var(--neon-cyan);
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+collectSfx.volume = 1.0; 
+gameOverSfx.volume = 1.0; 
+
+
+// --- Configuration des Éléments HTML ---
+const canvas = document.getElementById('game-canvas');
+const ctx = canvas.getContext('2d');
+const scoreDisplay = document.getElementById('current-score');
+const gameOverScreen = document.getElementById('game-over-screen');
+const replayButton = document.getElementById('replay-button');
+const introScreen = document.getElementById('intro-screen');
+const gameContainer = document.getElementById('game-container');
+const victoryScreen = document.getElementById('victory-screen'); 
+const nextWordButton = document.getElementById('next-word-button'); 
+const targetWordDisplay = document.getElementById('target-word'); 
+const finalScoreDisplay = document.getElementById('final-score'); 
+const startButton = document.getElementById('start-button'); 
+
+// --- Configuration du Jeu et de la Difficulté ---
+const gridSize = 20;
+const tileCount = canvas.width / gridSize;
+
+// PARAMÈTRES DE DIFFICULTÉ
+const BASE_SPEED = 150;
+const DIFFICULTY_THRESHOLD = 200;
+const DIFFICULTY_SPEED = 100;
+
+let gameSpeed = BASE_SPEED;
+let gameLoopInterval;
+
+// --- Dictionnaire et États Spécifiques au Jeu de Mots ---
+let DICTIONARY = ["NEON", "PYTHON", "CODE", "ARCADE", "MOT", "SERPENT", "JEU"]; 
+const INITIAL_DICTIONARY = [...DICTIONARY]; 
+let currentWord = '';         
+let lettersToCollect = [];    
+let nextLetterIndex = 0;      
+let totalScore = 0;           
+
+// --- Couleurs Néon ---
+const NEON_COLORS = [
+    { fill: '#ff00ff', shadow: '#ff00ff' }, // Magenta
+    { fill: '#33ffff', shadow: '#33ffff' }, // Cyan
+    { fill: '#00ff7f', shadow: '#00ff7f' }, // Vert Émeraude
+    { fill: '#ff4500', shadow: '#ff4500' }, // Orange Rouge
+    { fill: '#ffff00', shadow: '#ffff00' }, // Jaune
+    { fill: '#8A2BE2', shadow: '#8A2BE2' }  // Bleu Violet
+];
+
+// --- VARIABLES DE POWER-UP ---
+let lifeUp = null;         
+let isImmune = false;      
+let immunityTimer = 0;     
+const IMMUNITY_DURATION = 5000;
+const POWER_UP_SPAWN_CHANCE = 0.15; 
+
+// --- VARIABLES TACTILES ---
+let touchStartX = 0;
+let touchStartY = 0;
+const SWIPE_THRESHOLD = 15; 
+
+let snake = [];
+let dx = gridSize;
+let dy = 0;
+let changingDirection = false;
+let snakeColor = NEON_COLORS[0];
+
+// --- Fonctions de Démarrage et Réinitialisation ---
+
+function initializeGame() {
+    gameOverScreen.style.display = 'none';
+    victoryScreen.style.display = 'none';
     
-    /* CLÉ MOBILE : Hauteur visible et centrage */
-    min-height: 100vh;
-    height: 100vh; 
-    height: 100svh; /* Pour la hauteur visible sur les navigateurs mobiles */
+    isImmune = false;
+    lifeUp = null;
     
-    overflow: hidden; 
-}
-
-/* --- Introduction (Écran de Démarrage) --- */
-#intro-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    height: 100svh; 
-    
-    background-color: var(--deep-purple); /* FOND UNI COULEUR NÉON */
-    
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    z-index: 100;
-    transition: opacity 1s ease-out; 
-
-    /* Si l'image est requise, décommenter ci-dessous (mais elle n'est pas essentielle ici) */
-    /* background-image: url('intro_background.png'); */ 
-    /* background-size: cover; */ 
-    /* background-position: center; */ 
-    /* background-repeat: no-repeat; */ 
-}
-
-/* --- Contenu de l'Intro (Pour le bouton DÉMARRER LE JEU et les titres) --- */
-#intro-content {
-    display: flex; 
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-top: 0; 
-}
-
-/* --- Style du titre "WORD SNAKE" --- */
-#intro-title {
-    display: block; 
-    opacity: 1 !important; /* Reste opaque */
-    font-size: 4em; 
-    color: var(--neon-cyan);
-    text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-cyan);
-    margin-bottom: 5px; 
-}
-
-/* --- Style de la signature "by D.V." avec effet clignotant --- */
-#intro-signature {
-    display: block; 
-    opacity: 1 !important; /* Reste opaque malgré la transition du parent */
-    font-size: 1.5em;
-    color: var(--neon-red); 
-    /* Règle clé pour le clignotement: */
-    animation: neon-blink 1.2s infinite alternate; 
-    
-    margin-bottom: 40px;
-}
-
-/* --- Animation Clignotante pour la signature (Recréée) --- */
-@keyframes neon-blink {
-    from { 
-        opacity: 1; 
-        text-shadow: 0 0 5px var(--neon-red), 0 0 10px var(--neon-red); 
+    if (lettersToCollect.length === 0 || nextLetterIndex >= currentWord.length) {
+        selectNewWord();
     }
-    to { 
-        opacity: 0.6; 
-        text-shadow: 0 0 2px var(--neon-red), 0 0 5px var(--neon-red); 
+    
+    snake = [
+        { x: 10 * gridSize, y: 15 * gridSize },
+        { x: 9 * gridSize, y: 15 * gridSize }
+    ];
+    dx = gridSize;
+    dy = 0;
+    snakeColor = NEON_COLORS[0];
+    
+    scoreDisplay.textContent = totalScore;
+    
+    if (nextLetterIndex === 0) {
+        placeLettersOnGrid();
+    }
+    
+    bgm.volume = 0.5; 
+    bgm.play().catch(e => console.log("L'utilisateur doit interagir avant de jouer l'audio."));
+    
+    if (gameLoopInterval) clearInterval(gameLoopInterval);
+    gameLoopInterval = setInterval(gameLoop, gameSpeed); 
+}
+
+function selectNewWord() {
+    if (DICTIONARY.length === 0) {
+        alert("Félicitations ! Vous avez complété tous les mots de notre dictionnaire. La liste est réinitialisée.");
+        DICTIONARY = [...INITIAL_DICTIONARY];
+    }
+    
+    const randomIndex = Math.floor(Math.random() * DICTIONARY.length);
+    currentWord = DICTIONARY[randomIndex];
+    nextLetterIndex = 0;
+    
+    DICTIONARY.splice(randomIndex, 1); 
+}
+
+function placeLettersOnGrid() {
+    lettersToCollect = [];
+    const positions = new Set();
+    
+    targetWordDisplay.textContent = currentWord; 
+    targetWordDisplay.innerHTML = `<span style="color: var(--neon-red); text-shadow: 0 0 5px var(--neon-red);">${currentWord}</span>`;
+
+    for (let i = 0; i < currentWord.length; i++) {
+        let newPos;
+        let posKey;
+        
+        do {
+            newPos = {
+                x: Math.floor(Math.random() * tileCount) * gridSize,
+                y: Math.floor(Math.random() * tileCount) * gridSize,
+                letter: currentWord[i],
+                color: NEON_COLORS[Math.floor(Math.random() * NEON_COLORS.length)] 
+            };
+            posKey = `${newPos.x},${newPos.y}`;
+        } while (positions.has(posKey) || isPositionOnSnake(newPos));
+
+        positions.add(posKey);
+        lettersToCollect.push(newPos);
+    }
+}
+
+function isPositionOnSnake(pos) {
+    return snake.some(segment => segment.x === pos.x && segment.y === pos.y);
+}
+
+function isPositionOnLetter(pos) {
+    return lettersToCollect.some(l => l.x === pos.x && l.y === pos.y);
+}
+
+function activateImmunity() {
+    if (!isImmune) {
+        isImmune = true;
+        immunityTimer = IMMUNITY_DURATION;
+        console.log("Immunité activée ! (5s)");
+    }
+}
+
+function spawnLifeUp() {
+    if (Math.random() < POWER_UP_SPAWN_CHANCE && lifeUp === null) {
+        let newPos;
+        let posKey;
+
+        do {
+            newPos = {
+                x: Math.floor(Math.random() * tileCount) * gridSize,
+                y: Math.floor(Math.random() * tileCount) * gridSize,
+            };
+            posKey = `${newPos.x},${newPos.y}`;
+        } while (isPositionOnSnake(newPos) || isPositionOnLetter(newPos));
+        
+        lifeUp = newPos;
     }
 }
 
 
-/* --- Style pour le bouton de démarrage --- */
-#start-button {
-    margin-top: 0; 
-    padding: 15px 30px;
-    background-color: var(--neon-red); 
-    color: var(--deep-purple);
-    border: none;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 1.5em;
-    font-weight: bold;
-    border-radius: 5px;
-    box-shadow: 0 0 15px var(--neon-red), 0 0 30px var(--neon-red);
-    transition: all 0.3s ease;
+// --- Logique de Difficulté ---
+
+function checkDifficultyIncrease() {
+    if (totalScore >= DIFFICULTY_THRESHOLD && gameSpeed === BASE_SPEED) {
+        
+        gameSpeed = DIFFICULTY_SPEED;
+        
+        clearInterval(gameLoopInterval);
+        gameLoopInterval = setInterval(gameLoop, gameSpeed);
+        
+        console.log("DIFFICULTÉ ACCRUE : Vitesse augmentée à " + gameSpeed + "ms !");
+    }
 }
 
-#start-button:hover {
-    background-color: white;
-    box-shadow: 0 0 20px var(--neon-red), 0 0 40px var(--neon-red);
-}
+// --- Fonctions de Dessin (Pseudo-3D Appliqué) ---
 
+function drawRect(x, y, color, shadowColor, letter = null) {
+    // 1. Dessine le carré principal (avec le halo néon)
+    ctx.fillStyle = color;
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = shadowColor;
+    ctx.fillRect(x, y, gridSize, gridSize);
+    ctx.shadowBlur = 0; // Réinitialise l'ombre pour ne pas affecter le 3D
 
-/* --- Conteneur du Jeu (CLÉ DE LA RÉACTIVITÉ) --- */
-#game-container {
-    background-color: var(--dark-purple);
-    border: 3px solid var(--neon-cyan);
-    box-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan) inset;
-    position: relative;
-    overflow: hidden;
+    // 2. Dessine l'effet de biseau/profondeur (Pseudo-3D)
+    // Côté sombre (bas et droite)
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)'; // Gris foncé semi-transparent
+    ctx.fillRect(x + 1, y + gridSize - 2, gridSize - 2, 2); // Bord inférieur
+    ctx.fillRect(x + gridSize - 2, y + 1, 2, gridSize - 2); // Bord droit
     
-    width: min(606px, 95vw, 95svh); 
-    height: min(606px, 95vw, 95svh);
+    // 3. Dessiner la lettre (si elle existe)
+    if (letter) {
+        ctx.font = '14px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        ctx.fillStyle = '#000000'; // Texte noir
+        
+        // Ajout d'une petite ombre sur le texte pour le détacher du fond du carré
+        ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
+        ctx.shadowBlur = 2;
+        
+        ctx.fillText(letter, x + gridSize / 2, y + gridSize / 2);
+        
+        ctx.shadowBlur = 0; // Réinitialiser l'ombre du texte
+    }
+}
+
+function drawLifeUp() {
+    if (lifeUp === null) return;
+
+    // Utilise drawRect pour dessiner le carré (qui aura l'effet 3D)
+    drawRect(lifeUp.x, lifeUp.y, '#FFFFFF', '#FFFFFF'); 
     
-    padding: 3px; 
+    // Dessine le cœur après le carré 3D pour s'assurer qu'il est en surface
+    ctx.fillStyle = '#FF0000'; 
+    ctx.font = '16px monospace'; 
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // Ajout d'une ombre au cœur pour un effet 3D/néon sur le Power-Up
+    ctx.shadowColor = '#FF0000';
+    ctx.shadowBlur = 4;
+    
+    ctx.fillText('♥', lifeUp.x + gridSize / 2, lifeUp.y + gridSize / 2); 
+    
+    ctx.shadowBlur = 0; // Réinitialiser après le cœur
 }
 
-#game-canvas {
-    display: block;
-    background-color: var(--dark-purple);
-    width: 100%; 
-    height: 100%;
+function drawSnake() {
+    for (let i = 0; i < snake.length; i++) {
+        if (isImmune && i === 0 && Date.now() % 300 < 150) {
+            drawRect(snake[i].x, snake[i].y, '#FFFF00', '#FF4500'); 
+        } else {
+            drawRect(snake[i].x, snake[i].y, snakeColor.fill, snakeColor.shadow); 
+        }
+    }
 }
 
-/* --- Affichage en Jeu --- */
-#target-word-display {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 1.5em;
-    text-shadow: 0 0 5px var(--neon-cyan), 0 0 10px var(--neon-cyan);
-    z-index: 10;
-    text-align: right; 
+function drawLetters() {
+    for (const letterPos of lettersToCollect) {
+        
+        const isNext = letterPos.letter === currentWord[nextLetterIndex];
+        
+        const fill = isNext ? snakeColor.fill : letterPos.color.fill;
+        const shadow = isNext ? snakeColor.shadow : letterPos.color.shadow;
+        
+        drawRect(letterPos.x, letterPos.y, fill, shadow, letterPos.letter);
+    }
 }
 
-#target-word {
-    font-size: 1.5em;
-    color: var(--neon-red); 
-    text-shadow: 0 0 5px var(--neon-red), 0 0 10px var(--neon-red);
+// --- Logique du Jeu (inchangée) ---
+
+function advanceSnake() {
+    const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+    snake.unshift(head);
+    
+    const hitIndex = lettersToCollect.findIndex(
+        l => l.x === head.x && l.y === head.y
+    );
+    
+    if (hitIndex !== -1) {
+        const collectedLetter = lettersToCollect[hitIndex];
+        const requiredLetter = currentWord[nextLetterIndex];
+        
+        if (collectedLetter.letter === requiredLetter) {
+            totalScore += 10;
+            scoreDisplay.textContent = totalScore;
+            
+            checkDifficultyIncrease();
+            
+            updateTargetWordDisplay();
+            
+            snakeColor = collectedLetter.color; 
+            
+            lettersToCollect.splice(hitIndex, 1);
+            nextLetterIndex++;
+
+            collectSfx.currentTime = 0; 
+            collectSfx.play();
+            
+            spawnLifeUp(); 
+            
+            if (nextLetterIndex >= currentWord.length) {
+                winGame(); 
+                return; 
+            }
+            
+        } else {
+            endGame(`ATTENDU : ${requiredLetter} !`);
+            return; 
+        }
+        
+    } else {
+        if (lifeUp !== null && head.x === lifeUp.x && head.y === lifeUp.y) {
+            activateImmunity();
+            lifeUp = null; 
+            collectSfx.currentTime = 0; 
+            collectSfx.play();
+        } else {
+            snake.pop(); 
+        }
+    }
 }
 
-#score-display {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    font-size: 1.5em;
-    text-shadow: 0 0 5px var(--neon-cyan), 0 0 10px var(--neon-cyan);
-    z-index: 10;
+function updateTargetWordDisplay() {
+    const collectedPart = currentWord.substring(0, nextLetterIndex + 1);
+    const remainingPart = currentWord.substring(nextLetterIndex + 1);
+
+    targetWordDisplay.innerHTML = 
+        `<span style="color: var(--neon-green); text-shadow: 0 0 5px var(--neon-green);">${collectedPart}</span>` + 
+        `<span style="color: var(--neon-red); text-shadow: 0 0 5px var(--neon-red);">${remainingPart}</span>`;
 }
 
-/* --- Écran GAME OVER --- */
-#game-over-screen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: none; 
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 20;
+
+function checkCollision() {
+    const head = snake[0];
+    
+    for (let i = 4; i < snake.length; i++) {
+        if (head.x === snake[i].x && head.y === snake[i].y) return true;
+    }
+
+    const hitWall = head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height;
+    
+    if (hitWall) {
+        if (isImmune) {
+            if (head.x < 0) head.x = canvas.width - gridSize;
+            else if (head.x >= canvas.width) head.x = 0;
+            else if (head.y < 0) head.y = canvas.height - gridSize;
+            else if (head.y >= canvas.height) head.y = 0;
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    return false; 
 }
 
-#game-over-text {
-    font-size: 5em;
-    color: var(--neon-red);
-    text-shadow: 0 0 10px var(--neon-red), 0 0 20px var(--neon-red), 0 0 40px var(--neon-red);
-    margin-bottom: 40px;
-    letter-spacing: 5px;
+function winGame() {
+    selectNewWord(); 
+    placeLettersOnGrid();
+    changingDirection = false;
 }
 
-#replay-button {
-    padding: 15px 30px;
-    background-color: var(--neon-cyan);
-    color: var(--deep-purple);
-    border: none;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 1.2em;
-    font-weight: bold;
-    border-radius: 5px;
-    box-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan);
-    transition: all 0.3s ease;
+function endGame(reason = "COLLISION MURALE") {
+    clearInterval(gameLoopInterval);
+    
+    document.getElementById('game-over-text').textContent = "GAME OVER";
+    console.log(`GAME OVER! Raison: ${reason}`);
+    
+    gameOverScreen.style.display = 'flex';
+    
+    bgm.pause();
+    bgm.currentTime = 0; 
+    gameOverSfx.currentTime = 0; 
+    gameOverSfx.play();
+    
+    totalScore = 0;
+    gameSpeed = BASE_SPEED;
 }
 
-#replay-button:hover {
-    background-color: white;
-    box-shadow: 0 0 15px var(--neon-cyan), 0 0 30px var(--neon-cyan), 0 0 50px var(--neon-cyan);
+// --- Boucle Principale du Jeu ---
+
+function gameLoop() {
+    changingDirection = false;
+    ctx.clearRect(0, 0, canvas.width, canvas.height); 
+    
+    if (isImmune) {
+        immunityTimer -= gameSpeed; 
+        if (immunityTimer <= 0) {
+            isImmune = false;
+            console.log("Immunité terminée.");
+        }
+    }
+    
+    if (checkCollision()) {
+        endGame("COLLISION MURALE");
+        return;
+    }
+    
+    advanceSnake();
+    drawLetters(); 
+    drawLifeUp(); 
+    drawSnake();
 }
 
-/* Écran de Victoire */
-#victory-screen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: none; 
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background-color: rgba(0, 0, 0, 0.7);
-    z-index: 30;
+// --- Contrôle des Événements (inchangé) ---
+
+function changeDirection(event) {
+    if (changingDirection) return;
+    changingDirection = true;
+
+    const LEFT = 37;
+    const UP = 38;
+    const RIGHT = 39;
+    const DOWN = 40;
+
+    const keyPressed = event.keyCode;
+
+    const goingUp = dy === -gridSize;
+    const goingDown = dy === gridSize;
+    const goingRight = dx === gridSize;
+    const goingLeft = dx === -gridSize;
+
+    if (keyPressed === LEFT && !goingRight) {
+        dx = -gridSize;
+        dy = 0;
+    } else if (keyPressed === UP && !goingDown) {
+        dx = 0;
+        dy = -gridSize;
+    } else if (keyPressed === RIGHT && !goingLeft) {
+        dx = gridSize;
+        dy = 0;
+    } else if (keyPressed === DOWN && !goingUp) {
+        dx = 0;
+        dy = gridSize;
+    }
 }
 
-#victory-text {
-    font-size: 4em;
-    color: var(--neon-green);
-    text-shadow: 0 0 10px var(--neon-green), 0 0 20px var(--neon-green);
-    margin-bottom: 20px;
+// --- Contrôle des Entrées (Tactile) ---
+
+function handleTouchStart(event) {
+    event.preventDefault(); 
+    touchStartX = event.touches[0].clientX;
+    touchStartY = event.touches[0].clientY;
 }
 
-#final-score {
-    font-size: 2em;
-    color: white;
-    margin-bottom: 40px;
+function handleTouchEnd(event) {
+    if (gameContainer.style.display === 'none') return;
+    
+    const touchEndX = event.changedTouches[0].clientX;
+    const touchEndY = event.changedTouches[0].clientY;
+    
+    const dxTouch = touchEndX - touchStartX;
+    const dyTouch = touchEndY - touchStartY;
+    
+    const absDx = Math.abs(dxTouch);
+    const absDy = Math.abs(dyTouch);
+    
+    if (absDx > SWIPE_THRESHOLD || absDy > SWIPE_THRESHOLD) {
+        let keyPressed;
+
+        if (absDx > absDy) {
+            keyPressed = (dxTouch > 0) ? 39 : 37; 
+        } else {
+            keyPressed = (dyTouch > 0) ? 40 : 38; 
+        }
+
+        changeDirection({ keyCode: keyPressed });
+    }
 }
 
-#next-word-button {
-    padding: 15px 30px;
-    background-color: var(--neon-green);
-    color: var(--deep-purple);
-    border: none;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 1.2em;
-    font-weight: bold;
-    border-radius: 5px;
-    box-shadow: 0 0 10px var(--neon-green), 0 0 20px var(--neon-green);
-    transition: all 0.3s ease;
+// --- Contrôle de l'Introduction et des Boutons ---
+
+function startGameSequence() {
+    bgm.volume = 0.5; 
+    bgm.play().catch(e => console.log("Audio play failed."));
+    
+    introScreen.style.opacity = '0'; 
+    
+    setTimeout(() => {
+        introScreen.style.display = 'none';
+        gameContainer.style.display = 'block';
+        
+        selectNewWord(); 
+        initializeGame(); 
+    }, 1000); 
 }
 
-#next-word-button:hover {
-    background-color: white;
-    box-shadow: 0 0 15px var(--neon-green), 0 0 30px var(--neon-green);
+function startIntroAndGame() {
+    introScreen.style.display = 'flex';
+    gameContainer.style.display = 'none';
 }
+
+// --- Écouteurs d'Événements (Final) ---
+document.addEventListener('keydown', changeDirection);
+canvas.addEventListener('touchstart', handleTouchStart, false); 
+canvas.addEventListener('touchend', handleTouchEnd, false);     
+
+replayButton.addEventListener('click', initializeGame); 
+nextWordButton.addEventListener('click', () => {
+    selectNewWord();
+    initializeGame();
+});
+
+startButton.addEventListener('click', startGameSequence);
+document.addEventListener('DOMContentLoaded', startIntroAndGame);
