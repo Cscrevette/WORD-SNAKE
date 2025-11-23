@@ -4,9 +4,10 @@
     --neon-cyan: #33ffff;
     --dark-purple: #12002b;
     --deep-purple: #0a001a;
-    --neon-green: #00ff7f; /* Nouvelle couleur pour la victoire */
+    --neon-green: #00ff7f;
 }
 
+/* NOUVEAU : CSS pour la réactivité mobile */
 body {
     background-color: var(--deep-purple);
     font-family: monospace;
@@ -15,18 +16,26 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column; /* Centrage vertical et empilement */
+    
     min-height: 100vh;
+    height: 100vh; 
+    height: 100svh; 
+    
     overflow: hidden; 
 }
 
-/* --- Introduction (Clignotement D.V.) --- */
+/* --- Introduction (Écran de Démarrage) --- */
 #intro-screen {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
+    height: 100svh; 
+    
     background-color: var(--deep-purple);
+    
     display: flex;
     justify-content: center;
     align-items: center;
@@ -35,40 +44,50 @@ body {
     transition: opacity 1s ease-out; 
 }
 
+/* --- Contenu de l'Intro (Titres et Bouton) --- */
 #intro-content {
-    display: flex;
+    display: flex; 
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    margin-top: 0; 
 }
 
+/* --- Style du titre "WORD SNAKE" --- */
 #intro-title {
-    font-size: 4em;
+    display: block; 
+    opacity: 1 !important;
+    font-size: 4em; 
     color: var(--neon-cyan);
     text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-cyan);
-    margin: 0;
-    letter-spacing: 3px;
-    white-space: nowrap;
-    margin-bottom: 20px; 
+    margin-bottom: 5px; 
 }
 
+/* --- Style de la signature "by D.V." avec effet clignotant --- */
 #intro-signature {
+    display: block; 
+    opacity: 1 !important;
     font-size: 1.5em;
     color: var(--neon-red); 
     text-shadow: 0 0 5px var(--neon-red), 0 0 10px var(--neon-red);
     animation: neon-blink 1.2s infinite alternate; 
-    margin: 0;
+    margin-bottom: 40px; 
 }
 
 @keyframes neon-blink {
-    0% { opacity: 1; }
-    50% { opacity: 0.2; }
-    100% { opacity: 1; }
+    from { 
+        opacity: 1; 
+        text-shadow: 0 0 5px var(--neon-red), 0 0 10px var(--neon-red); 
+    }
+    to { 
+        opacity: 0.6; 
+        text-shadow: 0 0 2px var(--neon-red), 0 0 5px var(--neon-red); 
+    }
 }
 
-/* NOUVEAU : Style pour le bouton de démarrage */
+/* --- Style pour le bouton de démarrage --- */
 #start-button {
-    margin-top: 30px;
+    margin-top: 0; 
     padding: 15px 30px;
     background-color: var(--neon-red); 
     color: var(--deep-purple);
@@ -87,26 +106,44 @@ body {
     box-shadow: 0 0 20px var(--neon-red), 0 0 40px var(--neon-red);
 }
 
-
-/* --- Conteneur et Canvas (Styles inchangés) --- */
+/* --- Conteneur du Jeu (CLÉ DE LA RÉACTIVITÉ RECTANGULAIRE) --- */
 #game-container {
-    width: 606px;
-    height: 606px;
     background-color: var(--dark-purple);
     border: 3px solid var(--neon-cyan);
     box-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan) inset;
     position: relative;
     overflow: hidden;
+    
+    /* Largeur basée sur 95vw */
+    width: min(606px, 95vw); 
+    
+    /* HAUTEUR : Utilise 85% de la hauteur visible du smartphone (pour créer le rectangle haut) */
+    height: min(800px, 85svh); 
+
+    padding: 3px; 
 }
 
 #game-canvas {
     display: block;
     background-color: var(--dark-purple);
+    
+    /* Le Canvas s'étire pour remplir le conteneur rectangulaire */
+    width: 100%; 
+    height: 100%;
 }
 
-/* --- Affichage en Jeu (Styles inchangés) --- */
+/* --- AFFICHAGE DU HUD (Rétabli en ABSOLU, mais dans un conteneur rectangulaire) --- */
+#score-display {
+    position: absolute; 
+    top: 10px;
+    left: 10px;
+    font-size: 1.5em;
+    text-shadow: 0 0 5px var(--neon-cyan), 0 0 10px var(--neon-cyan);
+    z-index: 10;
+}
+
 #target-word-display {
-    position: absolute;
+    position: absolute; 
     top: 10px;
     right: 10px;
     font-size: 1.5em;
@@ -121,16 +158,8 @@ body {
     text-shadow: 0 0 5px var(--neon-red), 0 0 10px var(--neon-red);
 }
 
-#score-display {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    font-size: 1.5em;
-    text-shadow: 0 0 5px var(--neon-cyan), 0 0 10px var(--neon-cyan);
-    z-index: 10;
-}
 
-/* --- Écran GAME OVER (Styles inchangés) --- */
+/* --- Écrans (Reste inchangé) --- */
 #game-over-screen {
     position: absolute;
     top: 0;
@@ -172,7 +201,6 @@ body {
     box-shadow: 0 0 15px var(--neon-cyan), 0 0 30px var(--neon-cyan), 0 0 50px var(--neon-cyan);
 }
 
-/* Écran de Victoire (caché) */
 #victory-screen {
     position: absolute;
     top: 0;
