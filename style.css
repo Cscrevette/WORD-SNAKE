@@ -4,7 +4,7 @@
     --neon-cyan: #33ffff;
     --dark-purple: #12002b;
     --deep-purple: #0a001a;
-    --neon-green: #00ff7f;
+    --neon-green: #00ff7f; /* Nouvelle couleur pour la victoire */
 }
 
 /* NOUVEAU : CSS pour la réactivité mobile */
@@ -16,7 +16,6 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: column; /* CLÉ : Pour empiler le HUD et le Jeu */
     
     /* CLÉ MOBILE : Hauteur visible et centrage */
     min-height: 100vh;
@@ -35,7 +34,7 @@ body {
     height: 100%;
     height: 100svh; 
     
-    background-color: var(--deep-purple);
+    background-color: var(--deep-purple); /* FOND UNI COULEUR NÉON */
     
     display: flex;
     justify-content: center;
@@ -43,9 +42,15 @@ body {
     flex-direction: column;
     z-index: 100;
     transition: opacity 1s ease-out; 
+
+    /* Si l'image est requise, décommenter ci-dessous (mais elle n'est pas essentielle ici) */
+    /* background-image: url('intro_background.png'); */ 
+    /* background-size: cover; */ 
+    /* background-position: center; */ 
+    /* background-repeat: no-repeat; */ 
 }
 
-/* --- Contenu de l'Intro (Titres et Bouton) --- */
+/* --- Contenu de l'Intro (Pour le bouton DÉMARRER LE JEU et les titres) --- */
 #intro-content {
     display: flex; 
     flex-direction: column;
@@ -57,7 +62,7 @@ body {
 /* --- Style du titre "WORD SNAKE" --- */
 #intro-title {
     display: block; 
-    opacity: 1 !important;
+    opacity: 1 !important; /* Reste opaque */
     font-size: 4em; 
     color: var(--neon-cyan);
     text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-cyan);
@@ -67,14 +72,16 @@ body {
 /* --- Style de la signature "by D.V." avec effet clignotant --- */
 #intro-signature {
     display: block; 
-    opacity: 1 !important;
+    opacity: 1 !important; /* Reste opaque malgré la transition du parent */
     font-size: 1.5em;
     color: var(--neon-red); 
-    text-shadow: 0 0 5px var(--neon-red), 0 0 10px var(--neon-red);
+    /* Règle clé pour le clignotement: */
     animation: neon-blink 1.2s infinite alternate; 
-    margin-bottom: 40px; 
+    
+    margin-bottom: 40px;
 }
 
+/* --- Animation Clignotante pour la signature (Recréée) --- */
 @keyframes neon-blink {
     from { 
         opacity: 1; 
@@ -85,6 +92,7 @@ body {
         text-shadow: 0 0 2px var(--neon-red), 0 0 5px var(--neon-red); 
     }
 }
+
 
 /* --- Style pour le bouton de démarrage --- */
 #start-button {
@@ -107,19 +115,8 @@ body {
     box-shadow: 0 0 20px var(--neon-red), 0 0 40px var(--neon-red);
 }
 
-/* NOUVEAU : Style du conteneur HUD placé au-dessus du jeu */
-#hud-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    
-    /* La largeur du HUD doit correspondre à la largeur max du jeu */
-    width: min(606px, 95vw); /* On base la largeur sur 95vw */
-    padding: 10px 0;
-    margin-bottom: 5px; 
-}
 
-/* --- Conteneur du Jeu (CLÉ DE LA RÉACTIVITÉ ET DU RECTANGLE HAUT) --- */
+/* --- Conteneur du Jeu (CLÉ DE LA RÉACTIVITÉ) --- */
 #game-container {
     background-color: var(--dark-purple);
     border: 3px solid var(--neon-cyan);
@@ -127,39 +124,24 @@ body {
     position: relative;
     overflow: hidden;
     
-    /* MODIFIÉ : La largeur est basée sur 95vw */
-    width: min(606px, 95vw); 
+    width: min(606px, 95vw, 95svh); 
+    height: min(606px, 95vw, 95svh);
     
-    /* NOUVEAU : La hauteur est basée sur la hauteur disponible (90% de la hauteur restante) */
-    /* Ceci étire la hauteur mais est limité par la hauteur de la grille (qui est carrée) */
-    height: min(606px, 90vh); 
-
     padding: 3px; 
 }
 
 #game-canvas {
     display: block;
     background-color: var(--dark-purple);
-    
-    /* Le Canvas doit maintenant s'étirer verticalement aussi (problème potentiel de déformation) */
     width: 100%; 
     height: 100%;
 }
 
-/* --- AFFICHAGE DU HUD (Styles d'éléments) --- */
-#score-display {
-    position: relative; 
-    top: auto;
-    left: auto;
-    font-size: 1.5em;
-    text-shadow: 0 0 5px var(--neon-cyan), 0 0 10px var(--neon-cyan);
-    z-index: 10;
-}
-
+/* --- Affichage en Jeu --- */
 #target-word-display {
-    position: relative; 
-    top: auto;
-    right: auto;
+    position: absolute;
+    top: 10px;
+    right: 10px;
     font-size: 1.5em;
     text-shadow: 0 0 5px var(--neon-cyan), 0 0 10px var(--neon-cyan);
     z-index: 10;
@@ -172,8 +154,16 @@ body {
     text-shadow: 0 0 5px var(--neon-red), 0 0 10px var(--neon-red);
 }
 
+#score-display {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 1.5em;
+    text-shadow: 0 0 5px var(--neon-cyan), 0 0 10px var(--neon-cyan);
+    z-index: 10;
+}
 
-/* --- Écrans (Reste inchangé) --- */
+/* --- Écran GAME OVER --- */
 #game-over-screen {
     position: absolute;
     top: 0;
@@ -215,6 +205,7 @@ body {
     box-shadow: 0 0 15px var(--neon-cyan), 0 0 30px var(--neon-cyan), 0 0 50px var(--neon-cyan);
 }
 
+/* Écran de Victoire */
 #victory-screen {
     position: absolute;
     top: 0;
