@@ -10,7 +10,7 @@
 
     <div id="intro-screen">
         <div id="intro-content"> 
-            <h1 id="intro-title">WORD SNAKE</h1>
+            <h1 id="intro-title">Snake Mots</h1>
             <p id="intro-signature">by D.V.</p> 
             <button id="start-button">DÉMARRER LE JEU</button> 
         </div>
@@ -20,13 +20,23 @@
         <div id="score-display">Score: <span id="current-score">0</span></div>
         <div id="target-word-display">Mot: <span id="target-word"></span></div>
     </div>
-    
+
     <div id="game-container" style="display: none;">
         
         <canvas id="game-canvas" width="600" height="600"></canvas>
 
+        <div id="game-over-screen" style="display: none;">
+            <h1 id="game-over-text">GAME OVER</h1>
+            <button id="replay-button">Rejouer</button>
         </div>
-    
+        
+        <div id="victory-screen" style="display: none;">
+            <h1 id="victory-text">MOT COMPLET !</h1>
+            <p id="final-score"></p>
+            <button id="next-word-button">Mot Suivant</button>
+        </div>
+    </div>
+
     <audio id="bgm" loop preload="auto">
         <source src="retro_music.mp3" type="audio/mpeg">
     </audio>
@@ -42,4 +52,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
