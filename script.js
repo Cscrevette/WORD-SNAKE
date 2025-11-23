@@ -198,9 +198,10 @@ function drawRect(x, y, color, shadowColor, letter = null) {
     ctx.shadowBlur = 10;
     ctx.shadowColor = shadowColor;
     ctx.fillRect(x, y, gridSize, gridSize);
-    ctx.shadowBlur = 0; 
+    ctx.shadowBlur = 0; // Réinitialise l'ombre pour ne pas affecter le 3D
 
     // 2. Dessine l'effet de biseau/profondeur (Pseudo-3D)
+    // Côté sombre (bas et droite)
     ctx.fillStyle = 'rgba(0, 0, 0, 0.4)'; // Gris foncé semi-transparent
     ctx.fillRect(x + 1, y + gridSize - 2, gridSize - 2, 2); // Bord inférieur
     ctx.fillRect(x + gridSize - 2, y + 1, 2, gridSize - 2); // Bord droit
@@ -213,31 +214,35 @@ function drawRect(x, y, color, shadowColor, letter = null) {
         
         ctx.fillStyle = '#000000'; // Texte noir
         
+        // Ajout d'une petite ombre sur le texte pour le détacher du fond du carré
         ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
         ctx.shadowBlur = 2;
         
         ctx.fillText(letter, x + gridSize / 2, y + gridSize / 2);
         
-        ctx.shadowBlur = 0;
+        ctx.shadowBlur = 0; // Réinitialiser l'ombre du texte
     }
 }
 
 function drawLifeUp() {
     if (lifeUp === null) return;
 
+    // Utilise drawRect pour dessiner le carré (qui aura l'effet 3D)
     drawRect(lifeUp.x, lifeUp.y, '#FFFFFF', '#FFFFFF'); 
     
+    // Dessine le cœur après le carré 3D pour s'assurer qu'il est en surface
     ctx.fillStyle = '#FF0000'; 
     ctx.font = '16px monospace'; 
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     
+    // Ajout d'une ombre au cœur pour un effet 3D/néon sur le Power-Up
     ctx.shadowColor = '#FF0000';
     ctx.shadowBlur = 4;
     
     ctx.fillText('♥', lifeUp.x + gridSize / 2, lifeUp.y + gridSize / 2); 
     
-    ctx.shadowBlur = 0; 
+    ctx.shadowBlur = 0; // Réinitialiser après le cœur
 }
 
 function drawSnake() {
@@ -262,7 +267,7 @@ function drawLetters() {
     }
 }
 
-// --- Logique du Jeu ---
+// --- Logique du Jeu (inchangée) ---
 
 function advanceSnake() {
     const head = { x: snake[0].x + dx, y: snake[0].y + dy };
@@ -398,7 +403,7 @@ function gameLoop() {
     drawSnake();
 }
 
-// --- Contrôle des Entrées (Clavier) ---
+// --- Contrôle des Événements (inchangé) ---
 
 function changeDirection(event) {
     if (changingDirection) return;
