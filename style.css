@@ -4,7 +4,7 @@
     --neon-cyan: #33ffff;
     --dark-purple: #12002b;
     --deep-purple: #0a001a;
-    --neon-green: #00ff7f; /* Nouvelle couleur pour la victoire */
+    --neon-green: #00ff7f;
 }
 
 /* NOUVEAU : CSS pour la réactivité mobile */
@@ -16,11 +16,12 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column; /* Alignement vertical */
     
     /* CLÉ MOBILE : Hauteur visible et centrage */
     min-height: 100vh;
     height: 100vh; 
-    height: 100svh; /* Pour la hauteur visible sur les navigateurs mobiles */
+    height: 100svh; 
     
     overflow: hidden; 
 }
@@ -34,7 +35,7 @@ body {
     height: 100%;
     height: 100svh; 
     
-    background-color: var(--deep-purple); /* FOND UNI COULEUR NÉON */
+    background-color: var(--deep-purple);
     
     display: flex;
     justify-content: center;
@@ -42,15 +43,8 @@ body {
     flex-direction: column;
     z-index: 100;
     transition: opacity 1s ease-out; 
-
-    /* Si l'image est requise, décommenter ci-dessous (mais elle n'est pas essentielle ici) */
-    /* background-image: url('intro_background.png'); */ 
-    /* background-size: cover; */ 
-    /* background-position: center; */ 
-    /* background-repeat: no-repeat; */ 
 }
 
-/* --- Contenu de l'Intro (Pour le bouton DÉMARRER LE JEU et les titres) --- */
 #intro-content {
     display: flex; 
     flex-direction: column;
@@ -62,7 +56,7 @@ body {
 /* --- Style du titre "WORD SNAKE" --- */
 #intro-title {
     display: block; 
-    opacity: 1 !important; /* Reste opaque */
+    opacity: 1 !important;
     font-size: 4em; 
     color: var(--neon-cyan);
     text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-cyan);
@@ -72,16 +66,14 @@ body {
 /* --- Style de la signature "by D.V." avec effet clignotant --- */
 #intro-signature {
     display: block; 
-    opacity: 1 !important; /* Reste opaque malgré la transition du parent */
+    opacity: 1 !important;
     font-size: 1.5em;
     color: var(--neon-red); 
-    /* Règle clé pour le clignotement: */
+    text-shadow: 0 0 5px var(--neon-red), 0 0 10px var(--neon-red);
     animation: neon-blink 1.2s infinite alternate; 
-    
-    margin-bottom: 40px;
+    margin-bottom: 40px; 
 }
 
-/* --- Animation Clignotante pour la signature (Recréée) --- */
 @keyframes neon-blink {
     from { 
         opacity: 1; 
@@ -92,7 +84,6 @@ body {
         text-shadow: 0 0 2px var(--neon-red), 0 0 5px var(--neon-red); 
     }
 }
-
 
 /* --- Style pour le bouton de démarrage --- */
 #start-button {
@@ -124,6 +115,9 @@ body {
     position: relative;
     overflow: hidden;
     
+    /* Marge inférieure CLÉ pour laisser de l'espace au D-Pad */
+    margin-bottom: 20px; 
+    
     width: min(606px, 95vw, 95svh); 
     height: min(606px, 95vw, 95svh);
     
@@ -137,7 +131,48 @@ body {
     height: 100%;
 }
 
-/* --- Affichage en Jeu --- */
+/* --- NOUVEAU : STYLE DU D-PAD VIRTUEL --- */
+#controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative; /* Ajusté pour centrage dans le flux normal */
+    z-index: 50;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#controls .row {
+    display: flex;
+    justify-content: center;
+    margin: 5px 0;
+}
+
+#controls button {
+    width: 60px;
+    height: 60px;
+    margin: 0 5px;
+    font-size: 20px;
+    font-weight: bold;
+    border: 2px solid var(--neon-cyan);
+    background-color: rgba(51, 255, 255, 0.2);
+    color: var(--neon-cyan);
+    box-shadow: 0 0 10px var(--neon-cyan);
+    cursor: pointer;
+    border-radius: 10px;
+    transition: background-color 0.1s;
+    user-select: none;
+}
+
+#controls button:active {
+    background-color: var(--neon-cyan);
+    color: var(--deep-purple);
+    box-shadow: 0 0 15px var(--neon-cyan);
+}
+/* FIN NOUVEAU D-PAD */
+
+
+/* --- Affichage en Jeu (Reste inchangé) --- */
 #target-word-display {
     position: absolute;
     top: 10px;
@@ -163,7 +198,6 @@ body {
     z-index: 10;
 }
 
-/* --- Écran GAME OVER --- */
 #game-over-screen {
     position: absolute;
     top: 0;
@@ -205,7 +239,6 @@ body {
     box-shadow: 0 0 15px var(--neon-cyan), 0 0 30px var(--neon-cyan), 0 0 50px var(--neon-cyan);
 }
 
-/* Écran de Victoire */
 #victory-screen {
     position: absolute;
     top: 0;
