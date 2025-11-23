@@ -34,6 +34,8 @@ body {
     height: 100%;
     height: 100svh; 
     
+    background-color: var(--deep-purple); /* FOND UNI COULEUR NÉON */
+    
     display: flex;
     justify-content: center;
     align-items: center;
@@ -41,11 +43,11 @@ body {
     z-index: 100;
     transition: opacity 1s ease-out; 
 
-    /* PROPRIÉTÉS POUR L'IMAGE DE FOND (L'image est maintenant SANS le titre) */
-    background-image: url('intro_background.png'); /* <<< Assurez-vous que ce nom est correct */
-    background-size: cover; 
-    background-position: center; 
-    background-repeat: no-repeat; 
+    /* ANCIENNES PROPRIÉTÉS D'IMAGE DE FOND SONT SUPPRIMÉES */
+    /* background-image: url('intro_background.png'); */ 
+    /* background-size: cover; */ 
+    /* background-position: center; */ 
+    /* background-repeat: no-repeat; */ 
 }
 
 /* --- Contenu de l'Intro (Pour le bouton DÉMARRER LE JEU et les titres) --- */
@@ -54,33 +56,40 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    /* On retire les marges pour un centrage parfait au milieu de l'écran */
     margin-top: 0; 
 }
 
-/* --- Révéler le titre et la signature HTML --- */
+/* --- Style du titre "WORD SNAKE" --- */
 #intro-title {
-    /* Révélé et centré */
     display: block; 
-    font-size: 4em;
+    opacity: 1 !important; /* Force l'opacité maximale */
+    font-size: 4em; /* Taille plus grande pour le titre */
     color: var(--neon-cyan);
     text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-cyan);
-    margin-bottom: 5px; /* Réduit l'espace sous le titre */
+    margin-bottom: 5px; /* Petit espace sous le titre */
 }
 
+/* --- Style de la signature "by D.V." avec effet clignotant --- */
 #intro-signature {
-    /* Révélé et centré */
     display: block; 
+    opacity: 1 !important; /* Force l'opacité maximale */
     font-size: 1.5em;
     color: var(--neon-red); 
     text-shadow: 0 0 5px var(--neon-red), 0 0 10px var(--neon-red);
-    animation: neon-blink 1.2s infinite alternate; 
+    animation: neon-blink 1.2s infinite alternate; /* ANIMATION CLIGNOTANTE */
     margin-bottom: 40px; /* Espace avant le bouton */
 }
 
+/* --- Animation Clignotante pour la signature --- */
+@keyframes neon-blink {
+    from { opacity: 1; text-shadow: 0 0 5px var(--neon-red), 0 0 10px var(--neon-red); }
+    to { opacity: 0.6; text-shadow: 0 0 2px var(--neon-red), 0 0 5px var(--neon-red); }
+}
+
+
 /* --- Style pour le bouton de démarrage --- */
 #start-button {
-    margin-top: 0; /* Plus besoin de marge supérieure */
+    margin-top: 0; 
     padding: 15px 30px;
     background-color: var(--neon-red); 
     color: var(--deep-purple);
@@ -121,7 +130,7 @@ body {
     height: 100%;
 }
 
-/* --- Affichage en Jeu (Styles inchangés) --- */
+/* --- Affichage en Jeu --- */
 #target-word-display {
     position: absolute;
     top: 10px;
@@ -147,7 +156,7 @@ body {
     z-index: 10;
 }
 
-/* --- Écran GAME OVER (Styles inchangés) --- */
+/* --- Écran GAME OVER --- */
 #game-over-screen {
     position: absolute;
     top: 0;
@@ -189,7 +198,7 @@ body {
     box-shadow: 0 0 15px var(--neon-cyan), 0 0 30px var(--neon-cyan), 0 0 50px var(--neon-cyan);
 }
 
-/* Écran de Victoire (caché) */
+/* Écran de Victoire */
 #victory-screen {
     position: absolute;
     top: 0;
