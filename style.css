@@ -16,12 +16,11 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: column; /* Alignement vertical */
     
     /* CLÉ MOBILE : Hauteur visible et centrage */
     min-height: 100vh;
     height: 100vh; 
-    height: 100svh; 
+    height: 100svh; /* Pour la hauteur visible sur les navigateurs mobiles */
     
     overflow: hidden; 
 }
@@ -43,8 +42,15 @@ body {
     flex-direction: column;
     z-index: 100;
     transition: opacity 1s ease-out; 
+
+    /* Si l'image est requise, décommenter et insérer le nom du fichier ici */
+    /* background-image: url('intro_background.png'); */ 
+    /* background-size: cover; */ 
+    /* background-position: center; */ 
+    /* background-repeat: no-repeat; */ 
 }
 
+/* --- Contenu de l'Intro (Pour le bouton DÉMARRER LE JEU et les titres) --- */
 #intro-content {
     display: flex; 
     flex-direction: column;
@@ -115,8 +121,7 @@ body {
     position: relative;
     overflow: hidden;
     
-    /* Marge inférieure CLÉ pour laisser de l'espace au D-Pad */
-    margin-bottom: 20px; 
+    /* Pas de marge inférieure dédiée au D-Pad */
     
     width: min(606px, 95vw, 95svh); 
     height: min(606px, 95vw, 95svh);
@@ -131,45 +136,7 @@ body {
     height: 100%;
 }
 
-/* --- NOUVEAU : STYLE DU D-PAD VIRTUEL --- */
-#controls {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative; /* Ajusté pour centrage dans le flux normal */
-    z-index: 50;
-    user-select: none;
-    -webkit-user-select: none;
-}
-
-#controls .row {
-    display: flex;
-    justify-content: center;
-    margin: 5px 0;
-}
-
-#controls button {
-    width: 60px;
-    height: 60px;
-    margin: 0 5px;
-    font-size: 20px;
-    font-weight: bold;
-    border: 2px solid var(--neon-cyan);
-    background-color: rgba(51, 255, 255, 0.2);
-    color: var(--neon-cyan);
-    box-shadow: 0 0 10px var(--neon-cyan);
-    cursor: pointer;
-    border-radius: 10px;
-    transition: background-color 0.1s;
-    user-select: none;
-}
-
-#controls button:active {
-    background-color: var(--neon-cyan);
-    color: var(--deep-purple);
-    box-shadow: 0 0 15px var(--neon-cyan);
-}
-/* FIN NOUVEAU D-PAD */
+/* --- RETRAIT DU STYLE DU D-PAD (#controls) --- */
 
 
 /* --- Affichage en Jeu (Reste inchangé) --- */
