@@ -16,6 +16,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column; /* CLÉ : Pour empiler le HUD et le Jeu */
     
     /* CLÉ MOBILE : Hauteur visible et centrage */
     min-height: 100vh;
@@ -42,12 +43,6 @@ body {
     flex-direction: column;
     z-index: 100;
     transition: opacity 1s ease-out; 
-
-    /* Si l'image est requise, décommenter et insérer le nom du fichier ici */
-    /* background-image: url('intro_background.png'); */ 
-    /* background-size: cover; */ 
-    /* background-position: center; */ 
-    /* background-repeat: no-repeat; */ 
 }
 
 /* --- Contenu de l'Intro (Pour le bouton DÉMARRER LE JEU et les titres) --- */
@@ -112,6 +107,17 @@ body {
     box-shadow: 0 0 20px var(--neon-red), 0 0 40px var(--neon-red);
 }
 
+/* NOUVEAU : Style du conteneur HUD placé au-dessus du jeu */
+#hud-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    /* La largeur du HUD doit correspondre à la largeur max du jeu */
+    width: min(606px, 95vw, 95svh); 
+    padding: 10px 0;
+    margin-bottom: 5px; 
+}
 
 /* --- Conteneur du Jeu (CLÉ DE LA RÉACTIVITÉ) --- */
 #game-container {
@@ -121,8 +127,7 @@ body {
     position: relative;
     overflow: hidden;
     
-    /* Pas de marge inférieure dédiée au D-Pad */
-    
+    /* Utilisation maximale de l'espace disponible */
     width: min(606px, 95vw, 95svh); 
     height: min(606px, 95vw, 95svh);
     
@@ -136,14 +141,21 @@ body {
     height: 100%;
 }
 
-/* --- RETRAIT DU STYLE DU D-PAD (#controls) --- */
+/* --- AFFICHAGE DU HUD (Styles d'éléments) --- */
+/* Ces éléments ne sont plus absolument positionnés */
+#score-display {
+    position: relative; 
+    top: auto;
+    left: auto;
+    font-size: 1.5em;
+    text-shadow: 0 0 5px var(--neon-cyan), 0 0 10px var(--neon-cyan);
+    z-index: 10;
+}
 
-
-/* --- Affichage en Jeu (Reste inchangé) --- */
 #target-word-display {
-    position: absolute;
-    top: 10px;
-    right: 10px;
+    position: relative; 
+    top: auto;
+    right: auto;
     font-size: 1.5em;
     text-shadow: 0 0 5px var(--neon-cyan), 0 0 10px var(--neon-cyan);
     z-index: 10;
@@ -156,15 +168,8 @@ body {
     text-shadow: 0 0 5px var(--neon-red), 0 0 10px var(--neon-red);
 }
 
-#score-display {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    font-size: 1.5em;
-    text-shadow: 0 0 5px var(--neon-cyan), 0 0 10px var(--neon-cyan);
-    z-index: 10;
-}
 
+/* --- Écrans (Reste inchangé) --- */
 #game-over-screen {
     position: absolute;
     top: 0;
